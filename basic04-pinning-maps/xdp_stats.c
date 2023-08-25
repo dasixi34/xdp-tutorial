@@ -104,13 +104,13 @@ static void stats_print(struct stats_record *stats_rec,
 
 		period = calc_period(rec, prev);
 		if (period == 0)
-		       return;
+			return;
 
 		packets = rec->total.rx_packets - prev->total.rx_packets;
 		pps     = packets / period;
 
 		bytes   = rec->total.rx_bytes   - prev->total.rx_bytes;
-		bps     = (bytes * 8)/ period / 1000000;
+		bps     = (bytes * 8) / period / 1000000;
 
 		printf(fmt, action, rec->total.rx_packets, pps,
 		       rec->total.rx_bytes / 1000 , bps,
@@ -118,7 +118,6 @@ static void stats_print(struct stats_record *stats_rec,
 	}
 	printf("\n");
 }
-
 
 /* BPF_MAP_TYPE_ARRAY */
 void map_get_value_array(int fd, __u32 key, struct datarec *value)

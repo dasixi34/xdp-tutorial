@@ -92,7 +92,7 @@ int xdp_vlan_swap_func(struct xdp_md *ctx)
  * IP (via the helpers in parsing_helpers.h).
  */
 SEC("xdp")
-int  xdp_parser_func(struct xdp_md *ctx)
+int xdp_parser_func(struct xdp_md *ctx)
 {
 	void *data_end = (void *)(long)ctx->data_end;
 	void *data = (void *)(long)ctx->data;
@@ -130,7 +130,6 @@ int  xdp_parser_func(struct xdp_md *ctx)
 
 		if (bpf_ntohs(icmp6h->icmp6_sequence) % 2 == 0)
 			action = XDP_DROP;
-
 	} else if (nh_type == bpf_htons(ETH_P_IP)) {
 		struct iphdr *iph;
 		struct icmphdr *icmph;
@@ -146,7 +145,8 @@ int  xdp_parser_func(struct xdp_md *ctx)
 		if (bpf_ntohs(icmph->un.echo.sequence) % 2 == 0)
 			action = XDP_DROP;
 	}
- out:
+
+out:
 	return xdp_stats_record_action(ctx, action);
 }
 

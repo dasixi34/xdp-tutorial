@@ -84,9 +84,9 @@ int main(int argc, char **argv)
 		.ifindex     = -1,
 		.do_unload   = false,
 	};
-        struct bpf_object *obj;
+	struct bpf_object *obj;
 	char errmsg[1024];
-        int err;
+	int err;
 
 	/* Set default BPF-ELF object file and BPF program name */
 	strncpy(cfg.filename, default_filename, sizeof(cfg.filename));
@@ -100,9 +100,9 @@ int main(int argc, char **argv)
 		usage(argv[0], __doc__, long_options, (argc == 1));
 		return EXIT_FAIL_OPTION;
 	}
-        /* Unload a program by prog_id, or
-         * unload all programs on net device
-         */
+	/* Unload a program by prog_id, or
+	 * unload all programs on net device
+	 */
 	if (cfg.do_unload || cfg.unload_all) {
 		err = do_unload(&cfg);
 		if (err) {
@@ -116,18 +116,18 @@ int main(int argc, char **argv)
 		return EXIT_OK;
 	}
 
-        /* Open a BPF object file */
-        DECLARE_LIBBPF_OPTS(bpf_object_open_opts, bpf_opts);
-        obj = bpf_object__open_file(cfg.filename, &bpf_opts);
-        err = libbpf_get_error(obj);
-        if (err) {
-                libxdp_strerror(err, errmsg, sizeof(errmsg));
-                fprintf(stderr, "Couldn't open BPF object file %s: %s\n",
-                        cfg.filename, errmsg);
-                return err;
-        }
+	/* Open a BPF object file */
+	DECLARE_LIBBPF_OPTS(bpf_object_open_opts, bpf_opts);
+	obj = bpf_object__open_file(cfg.filename, &bpf_opts);
+	err = libbpf_get_error(obj);
+	if (err) {
+		libxdp_strerror(err, errmsg, sizeof(errmsg));
+		fprintf(stderr, "Couldn't open BPF object file %s: %s\n",
+						cfg.filename, errmsg);
+		return err;
+	}
 
-        /* List available programs */
+	/* List available programs */
 	if (verbose)
 		list_avail_progs(obj);
 

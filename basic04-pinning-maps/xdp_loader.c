@@ -89,7 +89,7 @@ int pin_maps_in_bpf_object(struct bpf_object *bpf_obj, const char *subdir)
 	}
 
 	/* Existing/previous XDP prog might not have cleaned up */
-	if (access(map_filename, F_OK ) != -1 ) {
+	if (access(map_filename, F_OK) != -1) {
 		if (verbose)
 			printf(" - Unpinning (remove) prev maps in %s/\n",
 			       pin_dir);

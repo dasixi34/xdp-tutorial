@@ -15,13 +15,13 @@
  */
 
 SEC("xdp")
-int  xdp_pass_func(struct xdp_md *ctx)
+int xdp_pass_func(struct xdp_md *ctx)
 {
-	return XDP_PASS;
+  return XDP_PASS;
 }
 
 SEC("xdp")
-int  xdp_drop_func(struct xdp_md *ctx)
+int xdp_drop_func(struct xdp_md *ctx)
 {
 	return XDP_DROP;
 }
@@ -33,10 +33,10 @@ char _license[] SEC("license") = "GPL";
 /* Hint the avail XDP action return codes are:
 
 enum xdp_action {
-        XDP_ABORTED = 0,
-        XDP_DROP,
-        XDP_PASS,
-        XDP_TX,
-        XDP_REDIRECT,
+  XDP_ABORTED = 0,
+  XDP_DROP,
+  XDP_PASS,
+  XDP_TX,
+  XDP_REDIRECT,
 };
 */

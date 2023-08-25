@@ -84,7 +84,7 @@ int pin_maps_in_bpf_object(struct bpf_object *bpf_obj, struct config *cfg)
 	}
 
 	/* Existing/previous XDP prog might not have cleaned up */
-	if (access(map_filename, F_OK ) != -1 ) {
+	if (access(map_filename, F_OK) != -1) {
 		if (verbose)
 			printf(" - Unpinning (remove) prev maps in %s/\n",
 			       cfg->pin_dir);
@@ -143,7 +143,6 @@ int main(int argc, char **argv)
 		fprintf(stderr, "ERR: creating pin dirname\n");
 		return EXIT_FAIL_OPTION;
 	}
-
 
 	program = load_bpf_and_xdp_attach(&cfg);
 	if (!program)

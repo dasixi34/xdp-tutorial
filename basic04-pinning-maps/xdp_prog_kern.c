@@ -50,7 +50,7 @@ __u32 xdp_stats_record_action(struct xdp_md *ctx, __u32 action)
 }
 
 SEC("xdp")
-int  xdp_pass_func(struct xdp_md *ctx)
+int xdp_pass_func(struct xdp_md *ctx)
 {
 	__u32 action = XDP_PASS; /* XDP_PASS = 2 */
 
@@ -58,7 +58,7 @@ int  xdp_pass_func(struct xdp_md *ctx)
 }
 
 SEC("xdp")
-int  xdp_drop_func(struct xdp_md *ctx)
+int xdp_drop_func(struct xdp_md *ctx)
 {
 	__u32 action = XDP_DROP;
 
@@ -66,7 +66,7 @@ int  xdp_drop_func(struct xdp_md *ctx)
 }
 
 SEC("xdp")
-int  xdp_abort_func(struct xdp_md *ctx)
+int xdp_abort_func(struct xdp_md *ctx)
 {
 	__u32 action = XDP_ABORTED;
 

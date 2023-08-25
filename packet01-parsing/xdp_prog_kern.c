@@ -60,7 +60,7 @@ static __always_inline int parse_ethhdr(struct hdr_cursor *nh,
 }*/
 
 SEC("xdp")
-int  xdp_parser_func(struct xdp_md *ctx)
+int xdp_parser_func(struct xdp_md *ctx)
 {
 	void *data_end = (void *)(long)ctx->data_end;
 	void *data = (void *)(long)ctx->data;
@@ -72,7 +72,7 @@ int  xdp_parser_func(struct xdp_md *ctx)
 	 */
 	__u32 action = XDP_PASS; /* Default action */
 
-        /* These keep track of the next header type and iterator pointer */
+	/* These keep track of the next header type and iterator pointer */
 	struct hdr_cursor nh;
 	int nh_type;
 
