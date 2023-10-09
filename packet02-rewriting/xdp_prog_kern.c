@@ -3,6 +3,7 @@
 #include <linux/in.h>
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_endian.h>
+#include <linux/udp.h>
 
 // The parsing helper functions from the packet01 lesson have moved here
 #include "../common/parsing_helpers.h"
@@ -16,30 +17,44 @@
  */
 static __always_inline int vlan_tag_pop(struct xdp_md *ctx, struct ethhdr *eth)
 {
-	/*
 	void *data_end = (void *)(long)ctx->data_end;
 	struct ethhdr eth_cpy;
 	struct vlan_hdr *vlh;
 	__be16 h_proto;
-	*/
 	int vlid = -1;
 
 	/* Check if there is a vlan tag to pop */
+	if (!proto_is_vlan(eth->h_proto))
+		return -1;
+
+	vlh = (void *)(eth + 1);
 
 	/* Still need to do bounds checking */
+	if (vlh + 1 > data_end)
+		return -1;
 
 	/* Save vlan ID for returning, h_proto for updating Ethernet header */
+	vlid = bpf_ntohs(vlh->h_vlan_TCI);
+	h_proto = vlh->h_vlan_encapsulated_proto;
 
 	/* Make a copy of the outer Ethernet header before we cut it off */
+	eth_cpy = *eth;
 
 	/* Actually adjust the head pointer */
+	if (bpf_xdp_adjust_head(ctx, sizeof(*vlh)))
+		return -1;
 
 	/* Need to re-evaluate data *and* data_end and do new bounds checking
 	 * after adjusting head
 	 */
+	eth = (void *)(long)ctx->data;
+	data_end = (void *)(long)ctx->data_end;
+	if (eth + 1 > data_end)
+		return -1;
 
 	/* Copy back the old Ethernet header and update the proto type */
-
+	*eth = eth_cpy;
+	eth->h_proto = h_proto;
 
 	return vlid;
 }
@@ -50,6 +65,30 @@ static __always_inline int vlan_tag_pop(struct xdp_md *ctx, struct ethhdr *eth)
 static __always_inline int vlan_tag_push(struct xdp_md *ctx,
 					 struct ethhdr *eth, int vlid)
 {
+	void *data_end = (void *)(long)ctx->data_end;
+	struct ethhdr eth_cpy;
+	struct vlan_hdr *vlh;
+
+	eth_cpy = *eth;
+
+	if (bpf_xdp_adjust_head(ctx, -(int)sizeof(*vlh)))
+		return -1;
+
+	eth = (void *)(long)ctx->data;
+	data_end = (void *)(long)ctx->data_end;
+	if (eth + 1 > data_end)
+		return -1;
+
+	*eth = eth_cpy;
+
+	vlh = (void *)(eth + 1);
+	if (vlh + 1 > data_end)
+		return -1;
+
+	vlh->h_vlan_TCI = bpf_htons(vlid);
+	vlh->h_vlan_encapsulated_proto = eth->h_proto;
+
+	eth->h_proto = bpf_htons(ETH_P_8021Q);
 	return 0;
 }
 
@@ -57,6 +96,33 @@ static __always_inline int vlan_tag_push(struct xdp_md *ctx,
 SEC("xdp")
 int xdp_port_rewrite_func(struct xdp_md *ctx)
 {
+	void *data_end = (void *)(long)ctx->data_end;
+	void *data = (void *)(long)ctx->data;
+
+	struct hdr_cursor nh;
+	int nh_type;
+	nh.pos = data;
+
+	struct ethhdr *eth;
+	nh_type = parse_ethhdr(&nh, data_end, &eth);
+	if (nh_type != bpf_htons(ETH_P_IPV6)) {
+		return XDP_ABORTED;
+	}
+
+	struct ipv6hdr *ip6h;
+	nh_type = parse_ip6hdr(&nh, data_end, &ip6h);
+	if (nh_type != IPPROTO_UDP) {
+		return XDP_ABORTED;
+	}
+
+	struct udphdr *udphdr;
+	parse_udphdr(&nh, data_end, &udphdr);
+	if (udphdr + 1 > data_end) {
+		return XDP_ABORTED;
+	}
+
+	udphdr->dest = bpf_htons(bpf_ntohs(udphdr->dest) - 1);
+
 	return XDP_PASS;
 }
 
